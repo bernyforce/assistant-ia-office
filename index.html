@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Assistant IA Documents</title>
+  <link rel="stylesheet" href="style.css"/>
+  <!-- Office JS SDK -->
+  <script src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
+  <!-- PDF.js pour lire les PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <!-- Mammoth.js pour lire les .docx -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  <!-- SheetJS pour lire les .xlsx -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+  <div id="app">
+    <!-- HEADER -->
+    <header>
+      <h1>🤖 Assistant IA</h1>
+      <p class="subtitle">Interrogez vos documents</p>
+    </header>
+
+    <!-- ONGLETS -->
+    <div class="tabs">
+      <button class="tab active" data-tab="chat">💬 Chat</button>
+      <button class="tab" data-tab="docs">📁 Documents</button>
+      <button class="tab" data-tab="config">⚙️ Config</button>
+    </div>
+
+    <!-- TAB: CONFIG -->
+    <div id="tab-config" class="tab-content" style="display:none;">
+      <div class="form-group">
+        <label>Fournisseur LLM</label>
+        <select id="llmProvider">
+          <option value="openrouter">OpenRouter (Kimi, Claude, etc.)</option>
+          <option value="ollama-remote">Ollama (distant)</option>
+          <option value="openai-compatible">Compatible OpenAI</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>URL de l'API</label>
+        <input type="url" id="apiUrl" placeholder="https://openrouter.ai/api/v1/chat/completions"/>
+      </div>
+
+      <div class="form-group">
+        <label>Clé API</label>
+        <input type="password" id="apiKey" placeholder="sk-or-v1-xxxx..."/>
+      </div>
+
+      <div class="form-group">
+        <label>Modèle</label>
+        <input type="text" id="modelName" placeholder="moonshotai/kimi-k2.5" 
+               list="modelSuggestions"/>
+        <datalist id="modelSuggestions">
+          <option value="moonshotai/kimi-k2.5"/>
+          <option value="anthropic/claude-sonnet-4"/>
+          <option value="google/gemini-2.5-pro"/>
+          <option value="openai/gpt-4o"/>
+          <option value="meta-llama/llama-3.3-70b-instruct"/>
+          <option value="deepseek/deepseek-chat-v3"/>
+        </datalist>
+      </div>
+
+      <div class="form-group">
+        <label>Langue des réponses</label>
+        <select id="responseLang">
+          <option value="fr">Français</option>
+          <option value="en">English</option>
+          <option value="ar">العربية</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Tokens max (réponse)</label>
+        <input type="number" id="maxTokens" value="2048" min="256" max="16384"/>
+      </div>
+
+      <button id="btnSaveConfig" class="btn-primary">💾 Sauvegarder la config</button>
+      <div id="configStatus" class="status"></div>
+    </div>
+
+    <!-- TAB: DOCUMENTS -->
+    <div id="tab-docs" class="tab-content" style="display:none;">
+      <div class="form-group">
+        <label>📂 Charger des fichiers (Word, PDF, Excel, PPT)</label>
+        <input type="file" id="fileInput" multiple
+               accept=".pdf,.docx,.doc,.xlsx,.xls,.pptx,.ppt,.txt,.md,.csv"/>
+        <button id="btnLoadFiles" class="btn-secondary">📥 Charger les fichiers</button>
+      </div>
+
+      <div class="form-group">
+        <label>📄 Ou lire le document actuellement ouvert dans Office</label>
+        <button id="btnReadCurrent" class="btn-secondary">📖 Lire doc ouvert</button>
+      </div>
+
+      <div id="docsLoaded">
+        <h3>Documents chargés (<span id="docCount">0</span>)</h3>
+        <div id="docsList"></div>
+      </div>
+
+      <div class="form-group" style="margin-top:10px;">
+        <button id="btnClearDocs" class="btn-danger">🗑️ Vider tous les documents</button>
+      </div>
+    </div>
+
+    <!-- TAB: CHAT -->
+    <div id="tab-chat" class="tab-content">
+      <div id="chatMessages">
+        <div class="message system">
+          Bienvenue ! Chargez des documents dans l'onglet 📁, 
+          configurez votre API dans ⚙️, puis posez vos questions ici.
+        </div>
+      </div>
+
+      <div id="chatInputArea">
+        <textarea id="questionInput" 
+                  placeholder="Posez votre question sur vos documents..."
+                  rows="3"></textarea>
+        <div class="chat-controls">
+          <label class="checkbox-label">
+            <input type="checkbox" id="chkIncludeCurrentDoc" checked/>
+            Inclure doc ouvert
+          </label>
+          <button id="btnAsk" class="btn-primary">Envoyer ➤</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BARRE DE STATUT -->
+    <div id="statusBar">Prêt</div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
